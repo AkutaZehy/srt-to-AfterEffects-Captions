@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRT to TXT Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #drop-area {
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      width: 80%;
+      margin: 0 auto;
+      background-color: #f9f9f9;
+    }
+    #drop-area.hover {
+      border-color: #333;
+    }
+    #file-input {
+      display: none;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f4f4f4;
+      white-space: pre-wrap;
+      text-align: left;
+      max-width: 80%;
+      margin: 20px auto;
+      overflow-wrap: break-word;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+  <script src="./srt2txt.js"></script>
+</head>
+<body>
+  <h1>SRT to TXT Converter</h1>
+  <div id="drop-area">
+    <p>Drag and drop your .srt file here, or click to select a file.</p>
+    <input type="file" id="file-input" accept=".srt">
+  </div>
+  <button id="copy-button" style="display: none;">Copy to Clipboard</button>
+  <div id="output"></div>
+
+  <script>
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const copyButton = document.getElementById('copy-button');
+    const outputDiv = document.getElementById('output');
+    let generatedTxt = '';
+
+    // Drag and drop events
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.classList.add('hover');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('hover');
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.classList.remove('hover');
+      if (e.dataTransfer.files.length > 0) {
+        const selectedFile = e.dataTransfer.files[0];
+        if (selectedFile.name.endsWith('.srt')) {
+          processFile(selectedFile);
+        } else {
+          alert('Please upload a valid .srt file.');
+        }
+      }
+    });
+
+    dropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      const selectedFile = e.target.files[0];
+      if (selectedFile && selectedFile.name.endsWith('.srt')) {
+        processFile(selectedFile);
+      } else {
+        alert('Please upload a valid .srt file.');
+      }
+    });
+
+    // Process the uploaded file
+    function processFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const srtContent = e.target.result;
+        generatedTxt = srtToTxt(srtContent); 
+        outputDiv.textContent = generatedTxt;
+        copyButton.style.display = 'inline-block';
+      };
+      reader.readAsText(file);
+    }
+
+    // Copy to clipboard
+    copyButton.addEventListener('click', () => {
+      navigator.clipboard.writeText(generatedTxt).then(() => {
+        alert('Text copied to clipboard!');
+      }).catch(err => {
+        alert('Failed to copy text: ' + err);
+      });
+    });
+  </script>
+</body>
+</html>
